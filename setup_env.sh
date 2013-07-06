@@ -7,7 +7,7 @@ sudo apt-get update
 sudo apt-get install -y nodejs
 
 # Setup Heroku
-wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+#wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
 heroku login
 ssh-keygen -t rsa
 heroku keys:add
