@@ -13,3 +13,7 @@ ssh-keygen -t rsa
 heroku keys:add
 heroku create
 git push heroku master
+
+# Bash setup
+echo "alias e='vi'" >> ~/.bashrc
+source ../.bashrc
