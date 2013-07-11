@@ -30,10 +30,6 @@ var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 
 var assertFileExists = function(infile) {
-    // parse infile
-    // if http... restler
-    restler.get(apiurl).on('complete', response2console);
-    // else 
     var instr = infile.toString();
     if(!fs.existsSync(instr)) {
         console.log("%s does not exist. Exiting.", instr);
