@@ -10,6 +10,7 @@ sudo apt-get install -y nodejs
 npm install cheerio
 npm install commander
 npm install restler
+npm install url
 
 # Setup Heroku
 #wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh

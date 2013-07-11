@@ -24,7 +24,8 @@ References:
 var fs = require('fs');
 var program = require('commander');
 var cheerio = require('cheerio');
-var restler = require('restler');
+var rest = require('restler');
+
 var HTMLFILE_DEFAULT = "index.html";
 var CHECKSFILE_DEFAULT = "checks.json";
 
@@ -45,12 +46,16 @@ var cheerioHtmlFile = function(htmlfile) {
     return cheerio.load(fs.readFileSync(htmlfile));
 };
 
+var cheerioRestResult = function(result) {
+    return cheerio.load(result);
+};
+
 var loadChecks = function(checksfile) {
     return JSON.parse(fs.readFileSync(checksfile));
 };
 
-var checkHtmlFile = function(htmlfile, checksfile) {
-    $ = cheerioHtmlFile(htmlfile);
+var checkHtmlFile = function(cheerobj, checksfile) {
+    $ = cheerobj;
     var checks = loadChecks(checksfile).sort();
     var out = {};
     for(var ii in checks) {
@@ -66,14 +71,42 @@ var clone = function(fn) {
     return fn.bind({});
 };
 
+var doRetardedJsonThingy = function(cheerobj) {
+    var checkJson = checkHtmlFile(cheerobj, program.checks);
+    var outJson = JSON.stringify(checkJson, null, 4);
+    return outJson;
+}
+
+var getPage = function(inurl) {
+    rest.get(inurl.toString()).on('complete', function(result, response) {
+        if (result instanceof Error) {
+            console.log('Error: ' + response.message);
+            this.retry(5000); // try again after 5 sec
+        } else {
+            //console.log(result);
+            var cheerobj = cheerioRestResult(result);
+            console.log(doRetardedJsonThingy(cheerobj));
+         }
+    });
+};
+
+var getFile = function(filename) {
+        var cheerobj = cheerioHtmlFile(program.file);
+        console.log(doRetardedJsonThingy(cheerobj));
+}
+
+
 if(require.main == module) {
     program
         .option('-c, --checks <check_file>', 'Path to checks.json', clone(assertFileExists), CHECKSFILE_DEFAULT)
         .option('-f, --file <html_file>', 'Path to index.html', clone(assertFileExists), HTMLFILE_DEFAULT)
+        .option('-u, --apiurl <url>', 'URL')
         .parse(process.argv);
-    var checkJson = checkHtmlFile(program.file, program.checks);
-    var outJson = JSON.stringify(checkJson, null, 4);
-    console.log(outJson);
+    if (program.apiurl) {
+        getPage(program.apiurl);
+    } else {
+        getFile(program.file);
+    }
 } else {
     exports.checkHtmlFile = checkHtmlFile;
 }
